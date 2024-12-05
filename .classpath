@@ -6,5 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="/ACM2AP_Brian_He"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
