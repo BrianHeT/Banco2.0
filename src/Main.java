@@ -7,7 +7,8 @@ public class Main {
         // Crear listas iniciales
         Usuario.setUsuarios(new LinkedList<Cliente>());
         Usuario.setAdmins(new LinkedList<Admin>());
-        Cliente cliente = new Cliente("Juan", "12345678", "1234", "chill", new Cuenta(1000));
+        Cliente juan = new Cliente("Juan", "12345", "1234", "chill", new Cuenta(1000));
+        Admin admin = new Admin("admin","admin","admin",01);
 
 
         // Opciones del menú
@@ -50,7 +51,7 @@ public class Main {
                 case 3: // Iniciar sesión administrador
                     Admin adminLogueado = (Admin) new Admin().login();  // Iniciar sesión administrador
                     if (adminLogueado != null) {
-                        Admin.menuAdmin(adminLogueado, null); // Puedes pasar un cliente como ejemplo
+                        Admin.menuAdmin(adminLogueado, null); 
                     }
                     break;
 
