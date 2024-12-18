@@ -15,6 +15,9 @@ public class Admin extends Usuario {
     public Admin(String nombre, String dni, String contrasena) {
         super(nombre, dni, contrasena);
     }
+    public Admin() {
+        super();
+    }
 
     public int getIdAdmin() {
         return idAdmin;
@@ -38,23 +41,29 @@ public class Admin extends Usuario {
     public String toString() {
         return "Administrador [nroAdmin=" + idAdmin + ", movimientos=" + movimientos + "]";
     }
+    public static void menuAdmin(Admin admin, Cliente cliente1) {
+        String[] opcionesAdmin = {
+            "Ver movimientos de cliente", 
+            "Cerrar sesión"
+        };
+        int opcion;
+        do {
+            opcion = JOptionPane.showOptionDialog(null, "Menú Administrador", "", 0, 0, null, opcionesAdmin, opcionesAdmin[0]);
+            switch (opcion) {
+                case 0:
+                  
+                    admin.verMovimientos(cliente1);
+                    break;
 
-
-    @Override
-    public void login() {
-        String nombre = validarInfo("Ingrese su nombre");
-        int nroAdmin = Integer.parseInt(validarInfo("Ingrese su número de administrador"));
-
-        for (Admin admin : Usuario.getAdmin()) {
-            if (admin.getNombre().equals(nombre) && admin.getIdAdmin() == nroAdmin) {
-                JOptionPane.showMessageDialog(null, "Bienvenido, " + nombre);
-                return; // Salimos del método si se encuentra el administrador
+                case 1:
+                    JOptionPane.showMessageDialog(null, "Sesión cerrada.");
+                    break;
             }
-        }
-
-        JOptionPane.showMessageDialog(null, "Error: administrador no encontrado.");
+        } while (opcion != 1);
     }
 
+
+   
 
     public void verMovimientos(Cliente cliente) {
         if (cliente.getCuenta().getMovimientos().isEmpty()) {

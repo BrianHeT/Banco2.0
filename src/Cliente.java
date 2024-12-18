@@ -6,13 +6,16 @@ import javax.swing.JOptionPane;
 public class Cliente extends Usuario{
 	private String tipo;
 	private Cuenta cuenta;
+	private CuentaInversion cuentaInversion;
 	public Cliente(String nombre, String dni, String contrasena, String tipo, Cuenta cuenta) {
 		super(nombre, dni, contrasena);
 		this.tipo = tipo;
 		this.cuenta = cuenta;
+		this.cuentaInversion = null;
 	}
 	public Cliente() {
 		super();
+		this.cuenta = new Cuenta(0);
 	
 	}
 	public String getTipo() {
@@ -32,33 +35,29 @@ public class Cliente extends Usuario{
 		return "Cliente [tipo=" + tipo + ", cuenta=" + cuenta + ", toString()=" + super.toString() + "\n]";
 	}
 	
-	@Override
-	public void login() {
-		for (Usuario cliente : Usuario.getUsuarios()) {
-			String nombre = validarInfo("Ingrese su nombre");
-			String dni = validarInfo("ingrese su dni");
-			if (cliente.getNombre().equalsIgnoreCase(nombre) && cliente.getDni().equals(dni)) {
-                JOptionPane.showMessageDialog(null, "Bienvenido, " + nombre);
-			} else {
-				JOptionPane.showMessageDialog(null, "error");
-			}
-		}
-	}
 	
-	
-	
-	public double Opciones(Cliente cliente) {
+	public double menucliente(Cliente cliente) {
 		  int opcion = 0;
 		    do {
-		        opcion = JOptionPane.showOptionDialog(null, cuenta, tipo, 0, 0, null, OpcionesGeneral.values(), OpcionesGeneral.values()[0]);
+		        opcion = JOptionPane.showOptionDialog(null, cuenta, tipo, 0, 0, null, OpcionesCliente.values(), OpcionesCliente.values()[0]);
 
 		        switch (opcion) {
-		            case 0: 
-		                double depositar = Double.parseDouble(JOptionPane.showInputDialog("Ingrese cantidad que quiere depositar"));
-		                this.cuenta.setSaldo(this.cuenta.getSaldo() + depositar);
-		                JOptionPane.showMessageDialog(null, "Ahora su saldo es de " + this.cuenta.getSaldo());
-		                this.cuenta.getMovimientos().add(new Movimiento(LocalDateTime.now(), this, "Depósito realizado", OpcionesMovimiento.DEPOSITO));
-		                break;
+		        case 0:  // Depositar dinero
+	                String depositarStr = JOptionPane.showInputDialog("Ingrese cantidad que quiere depositar");
+	                if (depositarStr != null && !depositarStr.isEmpty()) {
+	                    double depositar = Double.parseDouble(depositarStr);
+	                    if (depositar < 0) {
+	                        JOptionPane.showMessageDialog(null, "Ingrese un monto");
+	                    } else {
+	                        this.cuenta.setSaldo(this.cuenta.getSaldo() + depositar);
+	                        JOptionPane.showMessageDialog(null, "Ahora su saldo es de " + this.cuenta.getSaldo());
+	                        this.cuenta.getMovimientos().add(new Movimiento(LocalDateTime.now(), this, "Depósito realizado", OpcionesMovimiento.DEPOSITO));
+	                    }
+	                } else {
+	                    JOptionPane.showMessageDialog(null, "Por favor ingrese un monto válido.");
+	                }
+	                break;
+
 
 		            case 1: 
 		                double transferencia = Double.parseDouble(JOptionPane.showInputDialog("Ingrese cantidad que quiere transferir a " + cliente.getNombre()));
@@ -88,11 +87,10 @@ public class Cliente extends Usuario{
 		                this.gestionarInversiones();
 		                break;
 
-		            default:
-		                JOptionPane.showMessageDialog(null, "Adios");
-		                break;
+		            case 4:
+		            	return this.cuenta.getSaldo();
 		        }
-		    } while (opcion != 3);
+		    } while (opcion != 4);
 
 		    return this.cuenta.getSaldo();
 		}
@@ -100,7 +98,6 @@ public class Cliente extends Usuario{
 	public void gestionarInversiones() {
 	    OpcionesInversion opcion = null;
 	    do {
-	        // Mostrar opciones al cliente
 	        opcion = (OpcionesInversion) JOptionPane.showInputDialog(
 	                null,
 	                "Seleccione una opción de inversión:",
@@ -111,21 +108,45 @@ public class Cliente extends Usuario{
 	                OpcionesInversion.REALIZAR_INVERSION
 	        );
 
-	        if (opcion == null) {
-	            break; 
-	        }
+	        if (opcion == null) break;
 
 	        switch (opcion) {
 	            case REALIZAR_INVERSION:
-	                realizarInversion();
-	                break;
-
-	            case CANCELAR_INVERSION:
-	                cancelarInversion();
+	                if (this.cuentaInversion == null) {
+	                    double montoInicial = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el monto a invertir:"));
+	                    if (montoInicial > 0 && montoInicial <= cuenta.getSaldo()) {
+	                        cuenta.setSaldo(cuenta.getSaldo() - montoInicial);
+	                        this.cuentaInversion = new CuentaInversion(montoInicial);
+	                        JOptionPane.showMessageDialog(null, "Inversión creada con éxito.");
+	                    } else {
+	                        JOptionPane.showMessageDialog(null, "Monto inválido o saldo insuficiente.");
+	                    }
+	                } else {
+	                    JOptionPane.showMessageDialog(null, "Ya tiene una cuenta de inversión activa.");
+	                }
 	                break;
 
 	            case MODIFICAR_INVERSION:
-	                modificarInversion();
+	                if (this.cuentaInversion != null) {
+	                    int dias = Integer.parseInt(JOptionPane.showInputDialog("Seleccione cantidad de dias para la inversion"));
+	                    for (int i = 0; i < dias; i++) {
+	                        this.cuentaInversion.simularDia();
+	                    }
+	                    JOptionPane.showMessageDialog(null, "el tiempo total de inversion es de:  " + dias + " días.");
+	                } else {
+	                    JOptionPane.showMessageDialog(null, "No tiene una cuenta de inversión activa.");
+	                }
+	                break;
+
+	            case CANCELAR_INVERSION:
+	                if (this.cuentaInversion != null) {
+	                    double saldoFinal = this.cuentaInversion.getSaldo();
+	                    cuenta.setSaldo(cuenta.getSaldo() + saldoFinal);
+	                    JOptionPane.showMessageDialog(null, "Inversión cancelada. Saldo devuelto: $" + saldoFinal);
+	                    this.cuentaInversion = null;
+	                } else {
+	                    JOptionPane.showMessageDialog(null, "No tiene una inversión activa para cancelar.");
+	                }
 	                break;
 
 	            case SALIR:
@@ -135,43 +156,4 @@ public class Cliente extends Usuario{
 	    } while (opcion != OpcionesInversion.SALIR);
 	}
 
-private void realizarInversion() {
-    double monto = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el monto a invertir:"));
-    if (monto <= 0) {
-        JOptionPane.showMessageDialog(null, "El monto debe ser mayor a cero.");
-    } else {
-        JOptionPane.showMessageDialog(null, "Inversión realizada por un monto de: $" + monto);
-    }
 }
-
-private void cancelarInversion() {
-    JOptionPane.showMessageDialog(null, "Inversión cancelada.");
-}
-
-private void modificarInversion() {
-    JOptionPane.showMessageDialog(null, "Inversión modificada.");
-}
-}
-/* public void depositar(double cantidad) {
-if (cantidad <= 0) {
-    JOptionPane.showMessageDialog(null, "El monto a depositar debe ser mayor a cero.", "Error", JOptionPane.ERROR_MESSAGE);
-    return;
-}
-this.Saldo += cantidad;
-agregarMovimiento(new Movimiento(LocalDateTime.now(), null, "Depósito de " + cantidad, OpcionesMovimiento.DEPOSITO));
-JOptionPane.showMessageDialog(null, "Depósito realizado con éxito. Nuevo saldo: $" + this.Saldo);
-}
-
-public void retirar(double cantidad) {
-if (cantidad <= 0) {
-    JOptionPane.showMessageDialog(null, "El monto a retirar debe ser mayor a cero.", "Error", JOptionPane.ERROR_MESSAGE);
-    return;
-}
-if (cantidad > Saldo) {
-    JOptionPane.showMessageDialog(null, "Fondos insuficientes. Saldo actual: $" + this.Saldo, "Error", JOptionPane.ERROR_MESSAGE);
-    return;
-}
-this.Saldo -= cantidad;
-agregarMovimiento(new Movimiento(LocalDateTime.now(), null, "Retiro de " + cantidad, OpcionesMovimiento.RETIRO));
-JOptionPane.showMessageDialog(null, "Retiro realizado con éxito. Nuevo saldo: $" + this.Saldo);
-}*/

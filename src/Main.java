@@ -1,69 +1,66 @@
+import java.util.LinkedList;
+
 import javax.swing.JOptionPane;
 
 public class Main {
     public static void main(String[] args) {
+        // Crear listas iniciales
+        Usuario.setUsuarios(new LinkedList<Cliente>());
+        Usuario.setAdmins(new LinkedList<Admin>());
+        Cliente cliente = new Cliente("Juan", "12345678", "1234", "chill", new Cuenta(1000));
 
-        // Crear instancias de clientes y administrador
-        Cliente cliente1 = new Cliente();
-        Cliente cliente2 = new Cliente();
-        Admin admin = new Admin(null, null, null, 0);
-
-        // Asignar cuenta a cliente1
-        cliente1.setCuenta(new Cuenta(0));
 
         // Opciones del menú
         String[] opciones = {
-            "Registrar cliente", 
-            "Registrar administrador", 
-            "Iniciar sesión cliente", 
-            "Iniciar sesión administrador",  
-            "Transacción", 
-            "Movimientos", 
+            "Registrar cliente",
+            "Registrar administrador",
+            "Iniciar sesión cliente",
+            "Iniciar sesión administrador",
             "Salir"
         };
 
-        int opcion = 0;
+        int opcion;
 
         do {
-            // Mostrar el menú
-            opcion = JOptionPane.showOptionDialog(null, "Menú", "", 0, 0, null, opciones, opciones[0]);
+            // Mostrar menú
+            opcion = JOptionPane.showOptionDialog(
+                null, "Menú Principal", "", 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
+                null, opciones, opciones[0]
+            );
+
             switch (opcion) {
-                case 0:
-                    // Registrar cliente
-                    cliente1.registrarCliente();
+                case 0: // Registrar cliente
+                    Cliente nuevoCliente = new Cliente();
+                    nuevoCliente.registrarCliente();
                     break;
 
-                case 1:
-                    // Registrar administrador
-                    admin.registrarAdmin();
+                case 1: // Registrar administrador
+                    Admin nuevoAdmin = new Admin();
+                    nuevoAdmin.registrarAdmin();
                     break;
 
-                case 2:
-                    // Iniciar sesión cliente
-                    cliente1.login();
+                case 2: // Iniciar sesión cliente
+                    Cliente clienteLogueado = (Cliente) new Cliente().login();  // Iniciar sesión cliente
+                    if (clienteLogueado != null) {
+                        clienteLogueado.menucliente(clienteLogueado);
+                    }
                     break;
 
-                case 3:
-                    // Iniciar sesión administrador
-                    admin.login();
+                case 3: // Iniciar sesión administrador
+                    Admin adminLogueado = (Admin) new Admin().login();  // Iniciar sesión administrador
+                    if (adminLogueado != null) {
+                        Admin.menuAdmin(adminLogueado, null); // Puedes pasar un cliente como ejemplo
+                    }
                     break;
 
-                case 4:
-                    // Realizar transacción
-                    cliente2.setNombre("yo"); 
-                    cliente1.Opciones(cliente2); 
+                case 4: // Salir
+                    JOptionPane.showMessageDialog(null, "Hasta luego.");
                     break;
 
-                case 5:
-                    
-                    admin.verMovimientos(cliente1);
-                    break;
-
-                case 6:
-                    // Salir
-                    JOptionPane.showMessageDialog(null, "Hasta luego");
-                    break;
+                default:
+                    JOptionPane.showMessageDialog(null, "Opción no válida.");
             }
-        } while (opcion != 6);
+        } while (opcion != 4);
     }
 }
